@@ -98,9 +98,9 @@ export default {
         },
     ],
     origins: {
-        left: {x: 0.75, y: 0.75},
-        top_left: {x: 0.63, y: 0.83},
-        bottom_left: {x: 0.65, y: 0.5},
+        left: {x: 0.5, y: 0.5},
+        top_left: {x: 0.5, y: 0.5},
+        bottom_left: {x: 0.5, y: 0.5},
     },
     stopTextures: {
         left: "left_1",

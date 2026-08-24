@@ -33,6 +33,10 @@ declare type CatchTheCatGameConfig = {
      * text at bottom right corner
      */
     credit?: string;
+    /**
+     * theme 'light' | 'dark'
+     */
+    theme?: 'light' | 'dark';
 };
 /*!
  * Catch The Cat Game
@@ -48,7 +52,7 @@ export default class CatchTheCatGame extends Phaser.Game {
             config.credit = "github.com/ganlvtech";
         }
         if (!config.backgroundColor) {
-            config.backgroundColor = 0xeeeeee;
+            config.backgroundColor = config.theme === 'dark' ? 0x1e1e2d : 0xffffff;
         }
         if (!config.initialWallCount) {
             config.initialWallCount = 8;
@@ -72,6 +76,13 @@ export default class CatchTheCatGame extends Phaser.Game {
         super(gameConfig);
         this.myConfig = config;
         this.mainScene = scene;
+    }
+
+    public setTheme(theme: 'light' | 'dark'): void {
+        this.myConfig.theme = theme;
+        if (this.mainScene) {
+            this.mainScene.setTheme(theme);
+        }
     }
 
     private _solver;

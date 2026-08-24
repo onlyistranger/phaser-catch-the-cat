@@ -86,6 +86,7 @@ export default class Cat extends Phaser.GameObjects.Sprite {
 
     private caught() {
         this.setTexture(data.cannotEscapeTextures[data.directions[this.direction].name]);
+        this.resetOriginAndScale();
     }
 
     private escape() {
@@ -130,13 +131,14 @@ export default class Cat extends Phaser.GameObjects.Sprite {
 
     private resetTextureToStop() {
         this.setTexture(data.stopTextures[data.directions[this.direction].name]);
+        this.resetOriginAndScale();
     }
 
     private resetOriginAndScale() {
         let directionData = data.directions[this.direction];
-        let origin = data.origins[directionData.name];
-        this.setOrigin(origin.x, origin.y);
-        this.scaleX = directionData.scaleX;
+        this.setOrigin(0.5, 0.5);
+        this.scaleX = directionData.scaleX * 0.5;
+        this.scaleY = 0.5;
     }
 
     private moveForward() {

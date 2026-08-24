@@ -28,6 +28,36 @@ enum GameState {
     LOSE = "lose",
 }
 
+export type ThemeMode = 'light' | 'dark';
+
+export interface ThemeColors {
+    backgroundColor: number;
+    blockNormal: number;
+    blockNormalStroke: number;
+    blockWall: number;
+    blockWallStroke: number;
+    textColor: string;
+}
+
+export const THEMES: Record<ThemeMode, ThemeColors> = {
+    light: {
+        backgroundColor: 0xffffff,
+        blockNormal: 0xb3d9ff,
+        blockNormalStroke: 0xffffff,
+        blockWall: 0x003366,
+        blockWallStroke: 0xffffff,
+        textColor: "#2c3e50",
+    },
+    dark: {
+        backgroundColor: 0x1e1e2d,
+        blockNormal: 0x313244,
+        blockNormalStroke: 0x1e1e2d,
+        blockWall: 0x89b4fa,
+        blockWallStroke: 0x1e1e2d,
+        textColor: "#e2e8f0",
+    },
+};
+
 export default class MainScene extends Phaser.Scene {
     public readonly w: number;
     public readonly h: number;
@@ -36,6 +66,7 @@ export default class MainScene extends Phaser.Scene {
     public readonly dx: number;
     public readonly dy: number;
     public game: CatchTheCatGame;
+    public currentTheme: ThemeMode = "light";
     private recordCoord: RecordCoord;
 
     constructor(w: number, h: number, r: number, initialWallCount: number) {
@@ -91,6 +122,51 @@ export default class MainScene extends Phaser.Scene {
 
     set creditText(value: CreditText) {
         this.data.set("credit_text", value);
+    }
+
+    get resetButton(): ResetButton {
+        return this.data.get("reset_button");
+    }
+
+    set resetButton(value: ResetButton) {
+        this.data.set("reset_button", value);
+    }
+
+    get undoButton(): UndoButton {
+        return this.data.get("undo_button");
+    }
+
+    set undoButton(value: UndoButton) {
+        this.data.set("undo_button", value);
+    }
+
+    public getThemeColors(): ThemeColors {
+        return THEMES[this.currentTheme] || THEMES.light;
+    }
+
+    public setTheme(theme: ThemeMode): void {
+        this.currentTheme = theme;
+        const colors = this.getThemeColors();
+        this.cameras.main.setBackgroundColor(colors.backgroundColor);
+        if (this.blocks) {
+            this.blocks.forEach(column => {
+                column.forEach(block => {
+                    block.updateColor();
+                });
+            });
+        }
+        if (this.statusBar) {
+            this.statusBar.setColor(colors.textColor);
+        }
+        if (this.creditText) {
+            this.creditText.setColor(colors.textColor);
+        }
+        if (this.resetButton) {
+            this.resetButton.setColor(colors.textColor);
+        }
+        if (this.undoButton) {
+            this.undoButton.setColor(colors.textColor);
+        }
     }
 
     get state(): GameState {
@@ -149,6 +225,10 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create(): void {
+        if (this.game.myConfig && this.game.myConfig.theme) {
+            this.currentTheme = this.game.myConfig.theme as ThemeMode;
+        }
+        this.cameras.main.setBackgroundColor(this.getThemeColors().backgroundColor);
         this.createAnimations();
         this.createBlocks();
         this.createCat();
@@ -273,7 +353,7 @@ export default class MainScene extends Phaser.Scene {
         for (let i = 0; i < this.w; i++) {
             blocks[i] = [];
             for (let j = 0; j < this.h; j++) {
-                let block = new Block(this, i, j, this.r * 0.9);
+                let block = new Block(this, i, j, this.r);
                 blocks[i][j] = block;
                 this.add.existing(block);
                 block.on("player_click", this.playerClick.bind(this));
@@ -303,6 +383,7 @@ export default class MainScene extends Phaser.Scene {
 
     private createResetButton(): void {
         let resetButton = new ResetButton(this);
+        this.resetButton = resetButton;
         this.add.existing(resetButton);
         resetButton.on("pointerup", () => {
             this.reset();
@@ -311,6 +392,7 @@ export default class MainScene extends Phaser.Scene {
 
     private createUndoButton(): void {
         let undoButton = new UndoButton(this);
+        this.undoButton = undoButton;
         this.add.existing(undoButton);
         undoButton.on("pointerup", () => {
             this.undo();

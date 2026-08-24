@@ -4,7 +4,7 @@ import _ from "../i18n";
 export default class UndoButton extends Phaser.GameObjects.Text {
     constructor(scene: MainScene) {
         super(scene, 0, 0, _("回退"), {});
-        this.setColor("#000000");
+        this.setColor(scene.getThemeColors().textColor);
         let r = scene.r;
         this.setFontSize(r);
         this.setPadding(r, r, r, r);

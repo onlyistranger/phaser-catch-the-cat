@@ -1,6 +1,16 @@
 import MainScene from "../scenes/mainScene";
 
-export default class Block extends Phaser.GameObjects.Arc {
+function createHexagonPoints(r: number): Phaser.Geom.Point[] {
+    const points: Phaser.Geom.Point[] = [];
+    const R = r / Math.cos(Math.PI / 6);
+    for (let k = 0; k < 6; k++) {
+        const angle = Math.PI / 6 + (k * Math.PI) / 3;
+        points.push(new Phaser.Geom.Point(R + R * Math.cos(angle), R + R * Math.sin(angle)));
+    }
+    return points;
+}
+
+export default class Block extends Phaser.GameObjects.Polygon {
     public readonly i: number;
     public readonly j: number;
     public readonly r: number;
@@ -8,14 +18,17 @@ export default class Block extends Phaser.GameObjects.Arc {
 
     constructor(scene: MainScene, i: number, j: number, r: number) {
         let position = scene.getPosition(i, j);
-        super(scene, position.x, position.y, r, 0, 360, false, 0, 1);
+        let points = createHexagonPoints(r);
+        let colors = scene.getThemeColors();
+        super(scene, position.x, position.y, points, colors.blockNormal, 1);
         this.i = i;
         this.j = j;
         this.r = r;
+        this.isStroked = true;
+        this.lineWidth = 1;
         this.isWall = false;
 
-        let shape = new Phaser.Geom.Circle(this.r / 2, this.r / 2, this.r);
-        this.setInteractive(shape, Phaser.Geom.Circle.Contains);
+        this.setInteractive();
         this.on("pointerdown", () => {
             this.emit("player_click", this.i, this.j);
         });
@@ -29,10 +42,17 @@ export default class Block extends Phaser.GameObjects.Arc {
 
     set isWall(value: boolean) {
         this._isWall = value;
-        if (value) {
-            this.fillColor = 0x003366;
+        this.updateColor();
+    }
+
+    public updateColor() {
+        let colors = this.scene.getThemeColors();
+        if (this._isWall) {
+            this.fillColor = colors.blockWall;
+            this.strokeColor = colors.blockWallStroke;
         } else {
-            this.fillColor = 0xb3d9ff;
+            this.fillColor = colors.blockNormal;
+            this.strokeColor = colors.blockNormalStroke;
         }
     }
 }
