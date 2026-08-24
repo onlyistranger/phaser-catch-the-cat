@@ -193,6 +193,33 @@ export function nearestSolver(blocksIsWall: boolean[][], i: number, j: number): 
     }
 }
 
+export function getOptimalPath(blocksIsWall: boolean[][], startI: number, startJ: number): {i: number, j: number}[] {
+    let blocks = new Blocks(blocksIsWall);
+    blocks.calcAllDistances();
+    let current = blocks.getBlock(startI, startJ);
+    if (!current || current.distance === Infinity || current.isWall) {
+        return [];
+    }
+    let path: {i: number, j: number}[] = [{i: startI, j: startJ}];
+    let visited: { [key: string]: boolean } = {};
+    visited[`${startI},${startJ}`] = true;
+
+    while (current && !current.isEdge) {
+        let dir = current.direction;
+        if (dir < 0) {
+            break;
+        }
+        let neighbour = current.neighbours[dir];
+        if (!neighbour || neighbour.isWall || visited[`${neighbour.i},${neighbour.j}`]) {
+            break;
+        }
+        path.push({i: neighbour.i, j: neighbour.j});
+        visited[`${neighbour.i},${neighbour.j}`] = true;
+        current = neighbour;
+    }
+    return path;
+}
+
 export default function nearestAndMoreRoutesSolver(blocksIsWall: boolean[][], i: number, j: number): number {
     let blocks = new Blocks(blocksIsWall);
     blocks.calcAllDistances();

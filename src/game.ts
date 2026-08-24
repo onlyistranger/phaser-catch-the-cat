@@ -37,6 +37,10 @@ declare type CatchTheCatGameConfig = {
      * theme 'light' | 'dark'
      */
     theme?: 'light' | 'dark';
+    /**
+     * enable debug mode to show optimal escape path
+     */
+    debug?: boolean;
 };
 /*!
  * Catch The Cat Game
@@ -76,12 +80,22 @@ export default class CatchTheCatGame extends Phaser.Game {
         super(gameConfig);
         this.myConfig = config;
         this.mainScene = scene;
+        if (config.debug) {
+            this.setDebug(true);
+        }
     }
 
     public setTheme(theme: 'light' | 'dark'): void {
         this.myConfig.theme = theme;
         if (this.mainScene) {
             this.mainScene.setTheme(theme);
+        }
+    }
+
+    public setDebug(enabled: boolean): void {
+        this.myConfig.debug = enabled;
+        if (this.mainScene) {
+            this.mainScene.setDebug(enabled);
         }
     }
 

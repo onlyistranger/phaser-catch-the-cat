@@ -7,7 +7,7 @@ import UndoButton from "../sprites/undoButton";
 import StatusBar from "../sprites/statusBar";
 import CreditText from "../sprites/creditText";
 import _ from "../i18n";
-import nearestSolver from "../solvers/nearestSolver";
+import nearestSolver, { getOptimalPath } from "../solvers/nearestSolver";
 import RawSVGFile from "../lib/RawSVGFile";
 
 declare type NeighbourData = {
@@ -67,6 +67,8 @@ export default class MainScene extends Phaser.Scene {
     public readonly dy: number;
     public game: CatchTheCatGame;
     public currentTheme: ThemeMode = "light";
+    public isDebug: boolean = false;
+    public debugGraphics: Phaser.GameObjects.Graphics;
     private recordCoord: RecordCoord;
 
     constructor(w: number, h: number, r: number, initialWallCount: number) {
@@ -167,6 +169,7 @@ export default class MainScene extends Phaser.Scene {
         if (this.undoButton) {
             this.undoButton.setColor(colors.textColor);
         }
+        this.drawDebugRoute();
     }
 
     get state(): GameState {
@@ -187,6 +190,7 @@ export default class MainScene extends Phaser.Scene {
                 return;
         }
         this.data.set("state", value);
+        this.drawDebugRoute();
     }
 
     static getNeighbours(i: number, j: number): NeighbourData[] {
@@ -232,6 +236,8 @@ export default class MainScene extends Phaser.Scene {
         this.createAnimations();
         this.createBlocks();
         this.createCat();
+        this.debugGraphics = this.add.graphics();
+        this.debugGraphics.setDepth(10);
         this.createStatusText();
         this.createResetButton();
         this.createUndoButton();
@@ -239,6 +245,47 @@ export default class MainScene extends Phaser.Scene {
         this.reset();
         if (this.game.solver) {
             this.cat.solver = this.game.solver;
+        }
+    }
+
+    public setDebug(enabled: boolean): void {
+        this.isDebug = enabled;
+        this.drawDebugRoute();
+    }
+
+    public drawDebugRoute(): void {
+        if (!this.debugGraphics) return;
+        this.debugGraphics.clear();
+        if (!this.isDebug || this.state !== GameState.PLAYING) {
+            return;
+        }
+
+        const path = getOptimalPath(this.blocksData, this.cat.i, this.cat.j);
+        if (path.length <= 1) {
+            return;
+        }
+
+        // Draw connecting route line
+        this.debugGraphics.lineStyle(4, 0xff5722, 0.85);
+        this.debugGraphics.beginPath();
+        for (let idx = 0; idx < path.length; idx++) {
+            const pos = this.getPosition(path[idx].i, path[idx].j);
+            if (idx === 0) {
+                this.debugGraphics.moveTo(pos.x, pos.y);
+            } else {
+                this.debugGraphics.lineTo(pos.x, pos.y);
+            }
+        }
+        this.debugGraphics.strokePath();
+
+        // Draw route waypoints
+        for (let idx = 1; idx < path.length; idx++) {
+            const pos = this.getPosition(path[idx].i, path[idx].j);
+            const isDestination = (idx === path.length - 1);
+            this.debugGraphics.fillStyle(isDestination ? 0x4caf50 : 0xff9800, 0.95);
+            this.debugGraphics.fillCircle(pos.x, pos.y, isDestination ? this.r * 0.38 : this.r * 0.25);
+            this.debugGraphics.fillStyle(0xffffff, 1);
+            this.debugGraphics.fillCircle(pos.x, pos.y, this.r * 0.1);
         }
     }
 
@@ -294,6 +341,7 @@ export default class MainScene extends Phaser.Scene {
             this.setStatusText(_("猫认输，你赢了！"));
             this.state = GameState.WIN;
         }
+        this.drawDebugRoute();
         return true;
     }
 
@@ -308,6 +356,7 @@ export default class MainScene extends Phaser.Scene {
         };
         this.state = GameState.PLAYING;
         this.setStatusText(_("点击小圆点，围住小猫"));
+        this.drawDebugRoute();
     }
 
     undo() {
@@ -321,6 +370,7 @@ export default class MainScene extends Phaser.Scene {
 
                 this.cat.undo(catCoord.i, catCoord.j);
                 this.getBlock(i, j).isWall = false;
+                this.drawDebugRoute();
             }
         } else {
             this.setStatusText(_("无路可退！！！"));

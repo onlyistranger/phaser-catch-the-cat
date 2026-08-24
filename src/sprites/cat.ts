@@ -160,6 +160,7 @@ export default class Cat extends Phaser.GameObjects.Sprite {
         this.once("animationcomplete", () => {
             this.moveForward();
             this.resetTextureToStop();
+            this.scene.drawDebugRoute();
         });
         return true;
     }
