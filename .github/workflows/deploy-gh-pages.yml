@@ -1,22 +1,38 @@
 name: Build and Deploy
+
 on:
   push:
     branches:
       - master
+      - main
+      - g-phone
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v4
 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install and Build 🔧
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: |
           npm install
-          npm run build
+          npx webpack --config webpack.config.js --mode=production --devtool=false
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+      - name: Deploy to GitHub Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: dist # The folder the action should deploy.
+          branch: gh-pages
+          folder: dist
