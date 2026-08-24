@@ -6,12 +6,11 @@ export default class ResetButton extends Phaser.GameObjects.Text {
         super(scene, 0, 0, _("重置"), {});
         this.setColor(scene.getThemeColors().textColor);
         let r = scene.r;
-        this.setFontSize(r);
-        this.setPadding(r, r, r, r);
-        this.setPosition(0, scene.game.canvas.height);
+        this.setFontSize(r * 0.85);
+        this.setPadding(r * 0.4, r * 0.2, r * 0.4, r * 0.2);
+        this.setPosition(r * 0.4, scene.game.canvas.height - r * 0.2);
         this.setOrigin(0, 1);
-        let shape = new Phaser.Geom.Rectangle(0, 0, this.width, this.height);
-        this.setInteractive(shape, Phaser.Geom.Rectangle.Contains);
+        this.setInteractive({ useHandCursor: true });
     }
 }
 

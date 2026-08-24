@@ -25,7 +25,7 @@ export default class Block extends Phaser.GameObjects.Polygon {
         this.j = j;
         this.r = r;
         this.isStroked = true;
-        this.lineWidth = 1;
+        this.lineWidth = 3;
         this.isWall = false;
 
         this.setInteractive();

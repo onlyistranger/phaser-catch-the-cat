@@ -41,20 +41,20 @@ export interface ThemeColors {
 
 export const THEMES: Record<ThemeMode, ThemeColors> = {
     light: {
-        backgroundColor: 0xffffff,
-        blockNormal: 0xb3d9ff,
-        blockNormalStroke: 0xffffff,
-        blockWall: 0x003366,
-        blockWallStroke: 0xffffff,
-        textColor: "#2c3e50",
+        backgroundColor: 0xf8fafc,
+        blockNormal: 0xdbeafe,
+        blockNormalStroke: 0x3b82f6,
+        blockWall: 0x1e3a8a,
+        blockWallStroke: 0x172554,
+        textColor: "#1e293b",
     },
     dark: {
-        backgroundColor: 0x1e1e2d,
-        blockNormal: 0x313244,
-        blockNormalStroke: 0x1e1e2d,
-        blockWall: 0x89b4fa,
-        blockWallStroke: 0x1e1e2d,
-        textColor: "#e2e8f0",
+        backgroundColor: 0x0f172a,
+        blockNormal: 0x1e293b,
+        blockNormalStroke: 0x475569,
+        blockWall: 0x38bdf8,
+        blockWallStroke: 0xbae6fd,
+        textColor: "#f8fafc",
     },
 };
 
@@ -291,8 +291,8 @@ export default class MainScene extends Phaser.Scene {
 
     getPosition(i: number, j: number): NeighbourData {
         return {
-            x: this.r * 3 + ((j & 1) === 0 ? this.r : this.dx) + i * this.dx,
-            y: this.r * 3 + this.r + j * this.dy,
+            x: this.r * 0.5 + ((j & 1) === 0 ? this.r : this.dx) + i * this.dx,
+            y: this.r * 1.8 + j * this.dy,
         };
     }
 
